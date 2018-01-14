@@ -256,6 +256,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
             case R.id.localonly:
                 Log.d(TAG, "onOptionsItemSelected : localonly ");
                 Intent i = mApp.getLaunchActivityIntent(MainActivity.class, "");
+                i.putExtra(Constants.LOCAL_ONLY_TAG, true);
                 startActivity(i);
                 return true;
 

@@ -12,6 +12,8 @@ public class Constants {
     public static int SAMPLE_RATE_LOCAL_HZ = 32000;
     public static int SAMPLE_RATE_NETWORK_HZ = 16000;
 
+    public static String LOCAL_ONLY_TAG = "tagLocalOnly";
+
     public static String PACKAGE_NAME = Constants.class.getPackage().getName();
 
     // Message
