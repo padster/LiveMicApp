@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:id="@+id/basic_menu">
         <item
@@ -17,21 +18,16 @@
 
     <group android:id="@+id/help_menu">
         <item
+            android:id="@+id/localonly"
+            android:icon="@drawable/ic_action_on_off"
+            android:title="Local only"
+            android:showAsAction="never" />
+
+        <item
             android:id="@+id/disconnect"
             android:icon="@drawable/ic_action_on_off"
             android:title="@string/disconnect"
             android:showAsAction="never" />
 
-        <item
-            android:id="@+id/about"
-            android:icon="@drawable/ic_action_discover"
-            android:title="@string/about"
-            android:showAsAction="never" />
-
-        <item
-            android:id="@+id/help"
-            android:icon="@drawable/ic_action_on_off"
-            android:title="@string/help"
-            android:showAsAction="never" />
     </group>
 </menu>

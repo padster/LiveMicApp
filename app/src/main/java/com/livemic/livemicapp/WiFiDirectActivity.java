@@ -231,14 +231,10 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
                 ConnectionService.getInstance().mConnMan.closeServer();
                 return true;
 
-            case R.id.about:
-                Log.d(TAG, "onOptionsItemSelected : about ");
-                Toast.makeText(this, "Free China using Peer-Peer", Toast.LENGTH_LONG).show();
-                return true;
-
-            case R.id.help:
-                Log.d(TAG, "onOptionsItemSelected : help ");
-                Toast.makeText(this, "learn to use Peer-Peer to fight against censorship", Toast.LENGTH_LONG).show();
+            case R.id.localonly:
+                Log.d(TAG, "onOptionsItemSelected : localonly ");
+                Intent i = mApp.getLaunchActivityIntent(MainActivity.class, "");
+                startActivity(i);
                 return true;
 
             default:
