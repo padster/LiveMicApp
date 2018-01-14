@@ -36,4 +36,8 @@ public class Constants {
     public static final String MSG_CONTENT = "msg";
 
     public static String KEY_DATA = "DATA";
+  public static int REWRITE_CAPACITY = 8128;
+
+  // Turn on for dalek-ification.
+  public static final boolean EASTER_EGG = false;
 }
