@@ -48,6 +48,7 @@ public class Conversation extends BaseObservable {
 
   private final WiFiDirectSource wifiSource;
   private WiFiDirectSink wifiSink;
+  private boolean easterEgg = false;
 
   public Conversation(
       Context ctx,
@@ -243,7 +244,7 @@ public class Conversation extends BaseObservable {
 
   /** Creates a source from the mic, and if connected, also forward the result to wifi. */
   private MicSource createMicSourceAndMaybeAttachToWiFi() {
-    MicSource micSource = new MicSource();
+    MicSource micSource = new MicSource(this);
     if (wifiSink != null) {
       micSource.addSink(wifiSink);
     }
@@ -297,5 +298,14 @@ public class Conversation extends BaseObservable {
     if (talkingSource.isLocal()) {
       talkingSource.attachToNewWiFiSink(sink);
     }
+  }
+
+  // Easter egg! Toggle dalek mode.
+  public void toggleEasterEgg() {
+    this.easterEgg = !this.easterEgg;
+  }
+
+  public boolean useEasterEgg() {
+    return this.easterEgg;
   }
 }

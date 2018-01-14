@@ -54,6 +54,8 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // set list adapter with row layout to adapter data
+        // HACK
+        this.setPeersVisible(false);
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.row_devices, peers));
         mApp = (LiveMicApp) getActivity().getApplication();
         onPeersAvailable(mApp.mPeers);
@@ -128,7 +130,7 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
      * Update UI for this device.
      *
      * @param device WifiP2pDevice object
-     */
+     *
     public void updateThisDevice(WifiP2pDevice device) { // callback of this device details changed bcast event.
         TextView nameview = (TextView) mContentView.findViewById(R.id.my_name);
         TextView statusview = (TextView) mContentView.findViewById(R.id.my_status);
@@ -142,6 +144,7 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
             statusview.setText("WiFi Direct Disabled, please re-enable.");
         }
     }
+   */
 
     /**
      * the callback defined in PeerListListener to get the async result
@@ -185,6 +188,11 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
                     public void onCancel(DialogInterface dialog) {
                     }
                 });
+    }
+
+
+    public void setPeersVisible(boolean visible) {
+      mContentView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
     /**

@@ -132,7 +132,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
                 mApp.mPeers.clear();
                 Log.d(TAG, "processIntent : WIFI_P2P_STATE_CHANGED_ACTION : disabled, null p2p channel to framework ");
                 if (mApp.mHomeActivity != null) {
-                    mApp.mHomeActivity.updateThisDevice(null);
+//                    mApp.mHomeActivity.updateThisDevice(null);
                     mApp.mHomeActivity.resetData();
                 }
                 AppPreferences.setStringToPref(mApp, AppPreferences.PREF_NAME, AppPreferences.P2P_ENABLED, "0");
@@ -172,9 +172,9 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
             mApp.mThisDevice = (WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
             mApp.mDeviceName = mApp.mThisDevice.deviceName;
             Log.d(TAG, "processIntent: WIFI_P2P_THIS_DEVICE_CHANGED_ACTION " + mApp.mThisDevice.deviceName);
-            if (mApp.mHomeActivity != null) {
-                mApp.mHomeActivity.updateThisDevice(mApp.mThisDevice);
-            }
+//            if (mApp.mHomeActivity != null) {
+//                mApp.mHomeActivity.updateThisDevice(mApp.mThisDevice);
+//            }
         }
     }
 
