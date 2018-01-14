@@ -211,41 +211,10 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
                 // startActivity(new Intent(home.class, Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 return true;
 
-            case R.id.atn_direct_enable:
-                if (!mApp.isP2pEnabled()) {
-                    // Since this is the system wireless settings activity, it's
-                    // not going to send us a result. We will be notified by
-                    // WiFiDeviceBroadcastReceiver instead.
-                    startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
-                } else {
-                    Log.e(TAG, " WiFi direct support : already enabled. ");
-                }
-                return true;
             case R.id.atn_direct_discover:
-                if (!mApp.isP2pEnabled()) {
-                    Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning, Toast.LENGTH_LONG).show();
-                    return true;
-                }
-
-                // show progressbar when discoverying.
-                final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
-                fragment.onInitiateDiscovery();
-
-                Log.d(TAG, "onOptionsItemSelected : start discovering ");
-                mApp.mP2pMan.discoverPeers(mApp.mP2pChannel, new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onOptionsItemSelected : discovery succeed... ");
-                    }
-
-                    @Override
-                    public void onFailure(int reasonCode) {
-                        Log.d(TAG, "onOptionsItemSelected : discovery failed !!! " + reasonCode);
-//                        fragment.clearPeers();
-                        Toast.makeText(WiFiDirectActivity.this, "Discovery Failed, try again... ", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+                fragmentList.setPeersVisible(true);
+                doDiscovery("Nice save!");
                 return true;
 
             case R.id.disconnect:
@@ -257,6 +226,34 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    // Advertise you're here, and look for others who are.
+    public void doDiscovery(final String finishedMessage) {
+      if (!mApp.isP2pEnabled()) {
+        Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning, Toast.LENGTH_LONG).show();
+        return;
+      }
+
+      // show progressbar when discoverying.
+      final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+      fragment.onInitiateDiscovery();
+
+      Log.d(TAG, "onOptionsItemSelected : start discovering ");
+      mApp.mP2pMan.discoverPeers(mApp.mP2pChannel, new WifiP2pManager.ActionListener() {
+        @Override
+        public void onSuccess() {
+          Toast.makeText(WiFiDirectActivity.this, finishedMessage, Toast.LENGTH_SHORT).show();
+          Log.d(TAG, "onOptionsItemSelected : discovery succeed... ");
+        }
+
+        @Override
+        public void onFailure(int reasonCode) {
+          Log.d(TAG, "onOptionsItemSelected : discovery failed !!! " + reasonCode);
+//                        fragment.clearPeers();
+          Toast.makeText(WiFiDirectActivity.this, "Discovery Failed, try again... ", Toast.LENGTH_SHORT).show();
+        }
+      });
     }
 
     /**
@@ -437,5 +434,19 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
       Intent i = mApp.getLaunchActivityIntent(MainActivity.class, "");
       i.putExtra(Constants.LOCAL_ONLY_TAG, true);
       startActivity(i);
+    }
+
+    /** Start conversation - do discovery, then wait. */
+    public void startConversation(View view) {
+      DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+      fragmentList.setPeersVisible(false);
+      doDiscovery("Waiting for someone to connect...");
+    }
+
+    /** Join conversation - do discovery, then pick your server. */
+    public void joinConversation(View view) {
+      DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager().findFragmentById(R.id.frag_list);
+      fragmentList.setPeersVisible(true);
+      doDiscovery("Select a conversation host to join.");
     }
 }

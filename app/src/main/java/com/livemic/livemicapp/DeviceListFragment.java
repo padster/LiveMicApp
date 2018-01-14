@@ -54,6 +54,8 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // set list adapter with row layout to adapter data
+        // HACK
+        this.setPeersVisible(false);
         this.setListAdapter(new WiFiPeerListAdapter(getActivity(), R.layout.row_devices, peers));
         mApp = (LiveMicApp) getActivity().getApplication();
         onPeersAvailable(mApp.mPeers);
@@ -186,6 +188,11 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
                     public void onCancel(DialogInterface dialog) {
                     }
                 });
+    }
+
+
+    public void setPeersVisible(boolean visible) {
+      mContentView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
     /**
