@@ -11,12 +11,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
 import com.livemic.livemicapp.ui.MicPagerAdapter;
+import com.livemic.livemicapp.ui.gl.GLView;
 
 import java.util.Collection;
 
 public class MainActivity extends AppCompatActivity implements TextChatLog {
   private SoundRewriter rewriter;
+  private GLView sampleView;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +31,18 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     ViewPager pager = (ViewPager) findViewById(R.id.mainPager);
     pager.setAdapter(pagerAdapter);
 
+    sampleView = (GLView) findViewById(R.id.sampleView);
     rewriter = new SoundRewriter();
   }
 
   public void start(View view) {
-    rewriter.start(this, this);
+    rewriter.start(this, this, new Runnable() {
+      @Override
+      public void run() {
+        Log.i(Constants.TAG, "INVALIDATING...");
+        sampleView.invalidate();
+      }
+    });
   }
 
   @Override
@@ -43,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     }
     TextView tv = (TextView) findViewById(R.id.messageLog);
     tv.setText(all);
+  }
+
+  // HACK - hook up local audio sink to UI
+  public void attachLocalBuffer(RecentSamplesBuffer buffer) {
+    sampleView.attachBuffer(buffer);
   }
 
 
