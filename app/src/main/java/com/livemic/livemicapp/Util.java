@@ -9,7 +9,17 @@ public class Util {
   // PCM comes in bytes in a byte array - convert to [-1 -> 1 float]
   public static float pcmBytesToFloat(byte b1, byte b2) {
     int asInt = b1 + (b2 << 8);
-    return (float)(asInt * SCALE);
+    float asFloat = (float)(asInt * SCALE);
+    return asFloat;
+  }
+
+  // Reverse pcmBytesToFloat
+  public static byte[] floatToPcmBytes(float f) {
+    byte[] result = new byte[2];
+    int asInt = (int)(f / SCALE);
+    result[0] = (byte)(asInt & 0xff);
+    result[1] = (byte)((asInt >> 8) & 0xff);
+    return result;
   }
 
   // Convert milliseconds to something that looks like 11m40s
