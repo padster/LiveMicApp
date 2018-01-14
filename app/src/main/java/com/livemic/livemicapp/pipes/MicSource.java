@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.effects.DalekEffect;
+import com.livemic.livemicapp.model.Conversation;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +19,7 @@ public class MicSource extends AudioSource {
   private final Timer timer = new Timer();
   private AudioRecord audioIn;
 
-  public MicSource() {
+  public MicSource(final Conversation c) {
     audioIn = new AudioRecord.Builder()
         .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
         .setAudioFormat(new AudioFormat.Builder()
@@ -36,7 +37,7 @@ public class MicSource extends AudioSource {
         byte[] array = new byte[Constants.REWRITE_CAPACITY];
         while(audioIn != null) {
           int nRead = audioIn.read(array, 0, Constants.REWRITE_CAPACITY, AudioRecord.READ_BLOCKING);
-          if (Constants.EASTER_EGG) {
+          if (c.useEasterEgg()) {
             array = EFFECT.newSampleBytes(array);
           }
           handleNewSamples(array);

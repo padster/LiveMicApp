@@ -110,11 +110,6 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     return testConversation;
   }
 
-
-  public void updateWithSamples(byte[] samples) {
-
-  }
-
   @Override
   protected void onPause() {
     super.onPause();
