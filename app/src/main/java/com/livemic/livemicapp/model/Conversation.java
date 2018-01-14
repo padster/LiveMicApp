@@ -2,8 +2,10 @@ package com.livemic.livemicapp.model;
 
 import android.databinding.BaseObservable;
 
+import com.livemic.livemicapp.Util;
 import com.livemic.livemicapp.pipes.AudioSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,17 +23,14 @@ public class Conversation extends BaseObservable {
 
   public Conversation(
       boolean amModerator,
-      List<Participant> participants,
       String currentTalker,
-      long talkingStartMs,
-      AudioSource talkingSource,
-      List<String> recentMessages) {
+      AudioSource talkingSource) {
     this.amModerator = amModerator;
-    this.participants = participants;
+    this.participants = new ArrayList<Participant>();
     this.currentTalker = currentTalker;
-    this.talkingStartMs = talkingStartMs;
+    this.talkingStartMs = System.currentTimeMillis();
     this.talkingSource = talkingSource;
-    this.recentMessages = recentMessages;
+    this.recentMessages = new ArrayList<String>();
   }
 
   //
@@ -57,6 +56,16 @@ public class Conversation extends BaseObservable {
     }
   }
 
+  /** @return Formatted string for current talker. */
+  public String formattedTalkerString() {
+    if ("".equals(currentTalker)) {
+      return "No speaker";
+    } else {
+      return String.format("Speaking: %s (%s)", currentTalker,
+          Util.formatTalkTime(System.currentTimeMillis() - talkingStartMs));
+    }
+  }
+
   //
   // Mutators
   //
@@ -70,6 +79,7 @@ public class Conversation extends BaseObservable {
   /** New person is talking! */
   public void updateTalker(Participant participant) {
     currentTalker = participant == null ? "" : participant.name;
+    talkingStartMs = System.currentTimeMillis();
     notifyChange();
   }
 

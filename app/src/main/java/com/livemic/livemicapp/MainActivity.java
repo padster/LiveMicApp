@@ -22,7 +22,6 @@ import com.livemic.livemicapp.ui.MicPagerAdapter;
 import com.livemic.livemicapp.ui.ParticipantListAdapter;
 import com.livemic.livemicapp.ui.gl.GLView;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class MainActivity extends AppCompatActivity implements TextChatLog {
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
 
     conversation = hackTestConversation();
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-    binding.setConv(conversation);
+    binding.setConversation(conversation);
 
     MicPagerAdapter pagerAdapter = new MicPagerAdapter(this);
     ViewPager pager = (ViewPager) findViewById(R.id.mainPager);
@@ -51,16 +50,15 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     RecyclerView listView = (RecyclerView) findViewById(R.id.participantList);
     listView.setLayoutManager(new LinearLayoutManager(this));
     listView.setAdapter(new ParticipantListAdapter(this, conversation));
-  }
 
-  public void start(View view) {
     rewriter.start(this, this, new Runnable() {
       @Override
       public void run() {
-        sampleView.invalidate();
+        conversation.notifyChange();
       }
     });
   }
+
 
   @Override
   public void handleChatText(String currentMessage, Collection<String> previousMessages) {
@@ -110,11 +108,8 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
   private Conversation hackTestConversation() {
     Conversation testConversation = new Conversation(
         true,
-        new ArrayList<Participant>(),
         "P1",
-        System.currentTimeMillis(),
-        null,
-        new ArrayList<String>());
+        null);
 
     // HACK
     Participant p1 = new Participant("P1");
