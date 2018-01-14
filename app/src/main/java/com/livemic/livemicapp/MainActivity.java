@@ -11,22 +11,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.livemic.livemicapp.databinding.ActivityMainBinding;
 import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.model.Participant;
+import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
 import com.livemic.livemicapp.ui.MicPagerAdapter;
 import com.livemic.livemicapp.ui.ParticipantListAdapter;
 import com.livemic.livemicapp.ui.gl.GLView;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class MainActivity extends AppCompatActivity implements TextChatLog {
-  private SoundRewriter rewriter;
   private GLView sampleView;
 
   // Data models
@@ -39,33 +36,31 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
 
     conversation = hackTestConversation();
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-    binding.setConv(conversation);
+    binding.setConversation(conversation);
 
     MicPagerAdapter pagerAdapter = new MicPagerAdapter(this);
     ViewPager pager = (ViewPager) findViewById(R.id.mainPager);
     pager.setAdapter(pagerAdapter);
 
     sampleView = (GLView) findViewById(R.id.sampleView);
-    rewriter = new SoundRewriter();
 
     RecyclerView listView = (RecyclerView) findViewById(R.id.participantList);
     listView.setLayoutManager(new LinearLayoutManager(this));
     listView.setAdapter(new ParticipantListAdapter(this, conversation));
-  }
 
-  public void start(View view) {
-    rewriter.start(this, this, new Runnable() {
+    SoundRewriter rewriter = new SoundRewriter();
+    rewriter.start(this, conversation, new Runnable() {
       @Override
       public void run() {
-        sampleView.invalidate();
+        conversation.notifyChange();
       }
     });
   }
 
+
   @Override
   public void handleChatText(String currentMessage, Collection<String> previousMessages) {
-    TextView tv = (TextView) findViewById(R.id.messageLog);
-    tv.setText(currentMessage);
+    conversation.updateMessages(currentMessage, previousMessages);
   }
 
   // HACK - hook up local audio sink to UI
@@ -108,17 +103,18 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
 
   // BIG HACK - this should come from network sharing stuff.
   private Conversation hackTestConversation() {
-    Conversation testConversation = new Conversation(
-        true,
-        new ArrayList<Participant>(),
-        "P1",
-        System.currentTimeMillis(),
-        null,
-        new ArrayList<String>());
-
     // HACK
     Participant p1 = new Participant("P1");
     Participant p2 = new Participant("P2");
+    Conversation testConversation = new Conversation(
+        this, // Owner activity
+        true, // Whether I'm the moderator
+        p1,   // My identity
+        "P1",  // Name of the current talker
+        // TODO: Wire up wifi connections and attach them in here...
+        null,
+        null
+    );
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);
     return testConversation;

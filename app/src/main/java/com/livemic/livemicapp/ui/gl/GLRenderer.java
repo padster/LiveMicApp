@@ -56,12 +56,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     // Redraw background color
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-
     if (this.buffer == null) {
       return;
     }
     float[] snapshot = this.buffer.getSamples();
-    Log.i(Constants.TAG, "DRAWING..." + snapshot.length);
     line.draw(mMVPMatrix, snapshot);
   }
 }
