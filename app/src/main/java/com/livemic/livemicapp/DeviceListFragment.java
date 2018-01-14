@@ -128,7 +128,7 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
      * Update UI for this device.
      *
      * @param device WifiP2pDevice object
-     */
+     *
     public void updateThisDevice(WifiP2pDevice device) { // callback of this device details changed bcast event.
         TextView nameview = (TextView) mContentView.findViewById(R.id.my_name);
         TextView statusview = (TextView) mContentView.findViewById(R.id.my_status);
@@ -142,6 +142,7 @@ public class DeviceListFragment extends ListFragment {  // callback of requestPe
             statusview.setText("WiFi Direct Disabled, please re-enable.");
         }
     }
+   */
 
     /**
      * the callback defined in PeerListListener to get the async result

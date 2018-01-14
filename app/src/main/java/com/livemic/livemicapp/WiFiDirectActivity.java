@@ -98,8 +98,8 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
         super.onResume();
         mHasFocus = true;
         if (mApp.mThisDevice != null) {
-            Log.d(TAG, "onResume : redraw this device details");
-            updateThisDevice(mApp.mThisDevice);
+//            Log.d(TAG, "onResume : redraw this device details");
+//            updateThisDevice(mApp.mThisDevice);
 
             // if p2p connetion info available, and my status is connected, enabled start chatting !
             if (mApp.mP2pInfo != null && mApp.mThisDevice.status == WifiP2pDevice.CONNECTED) {
@@ -150,7 +150,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
 
     /**
      * process WIFI_P2P_THIS_DEVICE_CHANGED_ACTION intent, refresh this device.
-     */
+     *
     public void updateThisDevice(final WifiP2pDevice device) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
@@ -159,6 +159,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
             }
         });
     }
+     */
 
     /**
      * update the device list fragment.
@@ -253,13 +254,6 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
                 ConnectionService.getInstance().mConnMan.closeServer();
                 return true;
 
-            case R.id.localonly:
-                Log.d(TAG, "onOptionsItemSelected : localonly ");
-                Intent i = mApp.getLaunchActivityIntent(MainActivity.class, "");
-                i.putExtra(Constants.LOCAL_ONLY_TAG, true);
-                startActivity(i);
-                return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -331,7 +325,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
                         startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
                     }
                 })
-                .setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         finish();
                     }
@@ -435,5 +429,13 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
           return;
         }
       }
+    }
+
+    /** Use this app as a normal mic, no network. Sound comes in mic, out headphone jack. */
+    public void useLocalMic(View view) {
+      Log.d(TAG, "useLocalMic ");
+      Intent i = mApp.getLaunchActivityIntent(MainActivity.class, "");
+      i.putExtra(Constants.LOCAL_ONLY_TAG, true);
+      startActivity(i);
     }
 }

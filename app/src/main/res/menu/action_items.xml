@@ -18,12 +18,6 @@
 
     <group android:id="@+id/help_menu">
         <item
-            android:id="@+id/localonly"
-            android:icon="@drawable/ic_action_on_off"
-            android:title="Local only"
-            android:showAsAction="never" />
-
-        <item
             android:id="@+id/disconnect"
             android:icon="@drawable/ic_action_on_off"
             android:title="@string/disconnect"
