@@ -8,8 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Collection;
+
+public class MainActivity extends AppCompatActivity implements TextChatLog {
   private SoundRewriter rewriter;
 
   @Override
@@ -22,7 +25,17 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void start(View view) {
-    rewriter.start();
+    rewriter.start(this, this);
+  }
+
+  @Override
+  public void handleChatText(String currentMessage, Collection<String> previousMessages) {
+    String all = currentMessage;
+    for (String msg : previousMessages) {
+      all += "\n" + previousMessages;
+    }
+    TextView tv = (TextView) findViewById(R.id.messageLog);
+    tv.setText(all);
   }
 
 

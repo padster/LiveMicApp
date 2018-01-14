@@ -19,7 +19,7 @@ public class SpeakerSink implements AudioSink {
             .build())
         .setAudioFormat(new AudioFormat.Builder()
             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .setSampleRate(32000)
+            .setSampleRate(Constants.SAMPLE_RATE_LOCAL_HZ)
             .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
             .build())
         .setBufferSizeInBytes(2 * Constants.REWRITE_CAPACITY)

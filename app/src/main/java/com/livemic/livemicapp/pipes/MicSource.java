@@ -22,7 +22,7 @@ public class MicSource extends AudioSource {
         .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
         .setAudioFormat(new AudioFormat.Builder()
             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .setSampleRate(32000)
+            .setSampleRate(Constants.SAMPLE_RATE_LOCAL_HZ)
             .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
             .build())
         .setBufferSizeInBytes(2 * Constants.REWRITE_CAPACITY)
