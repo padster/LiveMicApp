@@ -61,7 +61,11 @@ public class Conversation extends BaseObservable {
     this.talkingStartMs = System.currentTimeMillis();
     this.recentMessages = new ArrayList<>();
     if (me.name.equals(currentTalker)) {
+      Log.i(Constants.TAG, "ME TALK FIRST");
       talkingSource.switchToLocalSource(createMicSourceAndMaybeAttachToWiFi());
+    } else {
+      Log.i(Constants.TAG, "THEY TALK FIRST");
+      talkingSource.switchToRemoteSource(wifiSource);
     }
   }
 

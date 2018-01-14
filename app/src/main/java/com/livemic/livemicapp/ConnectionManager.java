@@ -30,6 +30,7 @@ import java.util.Map;
  * You know when a socket channel disconnected when you read -1 or write exception. You need app level ACK.
  */
 public class ConnectionManager {
+    public static final int PORT = 1080;
 
     private final String TAG = "PTP_ConnMan";
 
@@ -67,6 +68,7 @@ public class ConnectionManager {
      * create a server socket channel to listen to the port for incoming connections.
      */
     public static ServerSocketChannel createServerSocketChannel(int port) throws IOException {
+        Log.i("SOCKET", "~~~~~~~~~ CREATING SERVER on " + port);
         // Create a non-blocking socket channel
         ServerSocketChannel ssChannel = ServerSocketChannel.open();
         ssChannel.configureBlocking(false);
@@ -80,6 +82,7 @@ public class ConnectionManager {
      * connect() is called on the new channel before it is returned.
      */
     public static SocketChannel createSocketChannel(String hostName, int port) throws IOException {
+        Log.i("SOCKET", "~~~~~~~~~ CONNECTING CLIENT at " + hostName + " / " + port);
         // Create a non-blocking socket channel
         SocketChannel sChannel = SocketChannel.open();
         sChannel.configureBlocking(false);
@@ -122,7 +125,8 @@ public class ConnectionManager {
 
         try {
             // connected to the server upon start client.
-            SocketChannel sChannel = connectTo(host, 1080);
+
+            SocketChannel sChannel = connectTo(host, PORT);
 
             mClientSelector = Selector.open();
             mClientSocketChannel = sChannel;
@@ -139,6 +143,7 @@ public class ConnectionManager {
 
         } catch (Exception e) {
             Log.e(TAG, "startClientSelector : exception: " + e.toString());
+            e.printStackTrace();
             mClientSelector = null;
             mClientSocketChannel = null;
             mApp.setMyAddr(null);
@@ -156,7 +161,7 @@ public class ConnectionManager {
 
         try {
             // create server socket and register to selector to listen OP_ACCEPT event
-            ServerSocketChannel sServerChannel = createServerSocketChannel(1080); // BindException if already bind.
+            ServerSocketChannel sServerChannel = createServerSocketChannel(PORT); // BindException if already bind.
             mServerSocketChannel = sServerChannel;
             mServerAddr = mServerSocketChannel.socket().getInetAddress().getHostAddress();
             if ("0.0.0.0".equals(mServerAddr)) {

@@ -45,7 +45,7 @@ public class LiveMicApp extends Application {
     WifiP2pDevice mThisDevice = null;
     WifiP2pInfo mP2pInfo = null;  // set when connection info available, reset when WIFI_P2P_CONNECTION_CHANGED_ACTION
 
-    boolean mIsServer = false;
+    public boolean mIsServer = false;
 
     WiFiDirectActivity mHomeActivity = null;
     List<WifiP2pDevice> mPeers = new ArrayList<WifiP2pDevice>();  // update on every peers available

@@ -20,8 +20,12 @@ import com.livemic.livemicapp.wifidirect.WorkHandler;
 
 import java.io.Serializable;
 import java.nio.channels.SocketChannel;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.livemic.livemicapp.Constants.MSG_BROKEN_CONN;
+import static com.livemic.livemicapp.Constants.MSG_CONNECT;
+import static com.livemic.livemicapp.Constants.MSG_DISCONNECT;
 import static com.livemic.livemicapp.Constants.MSG_FINISH_CONNECT;
 import static com.livemic.livemicapp.Constants.MSG_NEW_CLIENT;
 import static com.livemic.livemicapp.Constants.MSG_NULL;
@@ -198,7 +202,16 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
      * the callback of requestPeers upon WIFI_P2P_PEERS_CHANGED_ACTION intent.
      */
     @Override
-    public void onPeersAvailable(WifiP2pDeviceList peerList) {
+    public void onPeersAvailable(final WifiP2pDeviceList peerList) {
+      new Timer().schedule(new TimerTask() {
+        @Override
+        public void run() {
+          HACKpeersAvailableDelayed(peerList);
+        }
+      }, 50);
+    }
+
+    private void HACKpeersAvailableDelayed(WifiP2pDeviceList peerList) {
         mApp.mPeers.clear();
         mApp.mPeers.addAll(peerList.getDeviceList());
         Log.d(TAG, "onPeersAvailable : update peer list...");
@@ -210,8 +223,12 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
 
         }
 
-        if (mApp.mP2pInfo != null && connectedPeer != null) {
-            if (mApp.mP2pInfo.groupFormed && mApp.mP2pInfo.isGroupOwner) {
+        Log.d(TAG, "onPeersAvailable : missing info? " + (mApp.mP2pInfo == null));
+        if (mApp.mP2pInfo != null) {
+            Log.d(TAG, "onPeersAvailable : group Formed? " + mApp.mP2pInfo.groupFormed);
+            Log.d(TAG, "onPeersAvailable : group Owner? " + mApp.mP2pInfo.isGroupOwner);
+
+          if (mApp.mP2pInfo.groupFormed && mApp.mP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onPeersAvailable : device is groupOwner: startSocketServer");
                 mApp.startSocketServer();
             } else if (mApp.mP2pInfo.groupFormed && connectedPeer != null) {
@@ -279,8 +296,8 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
     /**
      * the launch_connect message process loop.
      */
-    private void processMessage(android.os.Message msg) {
-
+    private void processMessage(final android.os.Message msg) {
+        Log.d(TAG, "processMessage: what = " + msg.what);
         switch (msg.what) {
             case MSG_NULL:
                 break;
@@ -296,9 +313,15 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
                 break;
             case MSG_STARTCLIENT:
                 Log.d(TAG, "processMessage: startClientSelector...");
-                if (mConnMan.startClientSelector((String) msg.obj) >= 0) {
-                    enableStartChatActivity();
-                }
+                final String host = (String) msg.obj;
+                new Timer().schedule(new TimerTask() {
+                  @Override
+                  public void run() {
+                    if (mConnMan.startClientSelector(host) >= 0) {
+                      enableStartChatActivity();
+                    }
+                  }
+                }, 2000);
                 break;
             case MSG_NEW_CLIENT:
                 Log.d(TAG, "processMessage:  onNewClient...");
@@ -346,9 +369,19 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
      */
     private Serializable onPullInData(SocketChannel schannel, Bundle b) {
         Serializable data = b.getSerializable(Constants.KEY_DATA);
-        Log.d(TAG, "onDataIn : recvd msg : " + data);
+//        Log.d(TAG, "onDataIn : recvd msg : " + data);
         mConnMan.onDataIn(schannel, data);  // pub to all client if this device is server.
-        MessageObject row = (MessageObject) data;
+        MessageObject msg = (MessageObject) data;
+
+        byte[] samples = msg.getAudioData();
+        if (samples != null) {
+          Log.d(TAG, "RECV> " + samples.length + " bytes");
+          if (mActivity != null) {
+            // HACK - spaghetti code
+            mActivity.updateWithSamples(samples);
+          }
+        }
+
         // TODO play audio
 //        showNotification(row);
         // add to activity if it is on focus.
@@ -458,4 +491,19 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
                 return "Unknown = " + deviceStatus;
         }
     }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    mHandler.removeMessages(MSG_NULL);
+    mHandler.removeMessages(MSG_STARTSERVER);
+    mHandler.removeMessages(MSG_STARTCLIENT);
+    mHandler.removeMessages(MSG_CONNECT);
+    mHandler.removeMessages(MSG_DISCONNECT);
+    mHandler.removeMessages(MSG_PUSHOUT_DATA);
+    mHandler.removeMessages(MSG_NEW_CLIENT);
+    mHandler.removeMessages(MSG_FINISH_CONNECT);
+    mHandler.removeMessages(MSG_PULLIN_DATA);
+    mHandler.removeMessages(MSG_REGISTER_ACTIVITY);
+  }
 }
