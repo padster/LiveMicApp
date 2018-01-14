@@ -4,8 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.BaseObservable;
+import android.graphics.Color;
 import android.os.Message;
-import android.support.v4.util.Preconditions;
 import android.util.Log;
 import android.view.View;
 
@@ -111,6 +111,16 @@ public class Conversation extends BaseObservable {
     } else {
       return String.format("Speaking: %s (%s)", currentTalker,
           Util.formatTalkTime(System.currentTimeMillis() - talkingStartMs));
+    }
+  }
+
+  /** @return Color for conversation. */
+  public int talkerStringBackground() {
+    boolean talkerIsMe = me.name.equals(currentTalker);
+    if (talkerIsMe) {
+      return Color.parseColor("#ef5350");
+    } else {
+      return Color.TRANSPARENT;
     }
   }
 
