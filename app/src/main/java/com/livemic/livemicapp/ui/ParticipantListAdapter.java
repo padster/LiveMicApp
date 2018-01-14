@@ -38,7 +38,6 @@ public class ParticipantListAdapter extends RecyclerView.Adapter<CustomViewHolde
 
   @Override
   public int getItemCount() {
-    Log.i(Constants.TAG, "# People: " + conversation.participantCount());
     return conversation.participantCount();
   }
 }

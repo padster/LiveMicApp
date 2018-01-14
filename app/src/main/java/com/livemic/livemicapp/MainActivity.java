@@ -103,14 +103,15 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
 
   // BIG HACK - this should come from network sharing stuff.
   private Conversation hackTestConversation() {
-    Conversation testConversation = new Conversation(
-        false,
-        "P1",
-        new MicSource());
-
     // HACK
     Participant p1 = new Participant("P1");
     Participant p2 = new Participant("P2");
+    Conversation testConversation = new Conversation(
+        this, // Owner activity
+        true, // Whether I'm the moderator
+        p1,   // My identity
+        "P1"  // Name of the current talker
+    );
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);
     return testConversation;

@@ -2,8 +2,6 @@ package com.livemic.livemicapp;
 
 import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.pipes.AudioSink;
-import com.livemic.livemicapp.pipes.AudioSource;
-import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
 import com.livemic.livemicapp.pipes.SpeakerSink;
 import com.livemic.livemicapp.pipes.SpeechToTextSink;
@@ -27,7 +25,7 @@ public class SoundRewriter {
     conversation.getAudioSource().addSink(uiOut);
     conversation.getAudioSource().addSink(audioOut);
 
-    if (conversation.isModerator()) {
+    if (conversation.amModerator()) {
       AudioSink speechToText = new SpeechToTextSink(activity, conversation);
       conversation.getAudioSource().addSink(speechToText);
     }

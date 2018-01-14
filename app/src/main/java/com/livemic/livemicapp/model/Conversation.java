@@ -1,11 +1,15 @@
 package com.livemic.livemicapp.model;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.databinding.BaseObservable;
+import android.icu.text.MessagePattern;
 import android.util.Log;
+import android.view.View;
 
 import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.Util;
-import com.livemic.livemicapp.pipes.AudioSink;
 import com.livemic.livemicapp.pipes.AudioSource;
 import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RemoteOrLocalSource;
@@ -19,6 +23,9 @@ import java.util.List;
  * A group discussion with lots of members.
  */
 public class Conversation extends BaseObservable {
+  private final Context ctx; // ew, yuk, this is horrible.
+
+
   // NOTE: IN PROGRESS!
   // Needs to be cleaned up a lot...
   private final RemoteOrLocalSource talkingSource = new RemoteOrLocalSource();
@@ -31,19 +38,23 @@ public class Conversation extends BaseObservable {
   private String currentMessage;
   private final List<String> recentMessages;
 
-  private boolean moderator;
+  private boolean amModerator;
+  private final Participant me;
 
   public Conversation(
-      boolean moderator,
-      String currentTalker,
-      MicSource localSource) {
-    this.moderator = moderator;
+      Context ctx,
+      boolean amModerator,
+      Participant me,
+      String currentTalker) {
+    this.ctx = ctx;
+    this.amModerator = amModerator;
+    this.me = me;
     this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
     this.recentMessages = new ArrayList<>();
-    if (localSource != null) {
-      talkingSource.switchToLocalSource(localSource);
+    if (me.name.equals(currentTalker)) {
+      talkingSource.switchToLocalSource(new MicSource());
     }
   }
 
@@ -56,9 +67,14 @@ public class Conversation extends BaseObservable {
     return this.talkingSource;
   }
 
-  /** @return Whether the local user is the moderator of the conversation. */
-  public boolean isModerator() {
-    return moderator;
+  /** @return Whether the local user is the amModerator of the conversation. */
+  public boolean amModerator() {
+    return amModerator;
+  }
+
+  /** @return Whether I can mute this user. */
+  public boolean canMute(Participant p) {
+    return amModerator() && isTalker(p) && !p.name.equals(me.name);
   }
 
   /** @return Participant in a particular position. */
@@ -121,9 +137,14 @@ public class Conversation extends BaseObservable {
   }
 
   /** New person is talking! */
-  public void updateTalker(Participant participant) {
-    currentTalker = participant == null ? "" : participant.name;
+  public void updateTalker(Participant newTalker) {
+    currentTalker = newTalker == null ? "" : newTalker.name;
     talkingStartMs = System.currentTimeMillis();
+    boolean talkerIsMe = me.name.equals(currentTalker);
+    boolean talkIsLocal = talkingSource.isLocal();
+    if (talkerIsMe != talkIsLocal) {
+      hackSwitchAudio();
+    }
     notifyChange();
   }
 
@@ -145,6 +166,27 @@ public class Conversation extends BaseObservable {
     }
     if (changed) {
       notifyChange();
+    }
+  }
+
+  /** Mute a user, but only after confirmation. */
+  public void handleMute(View view, final Participant participant) {
+    new AlertDialog.Builder(ctx)
+        .setTitle("Confirm Mute")
+        .setMessage("Stop " + participant.name + " talking?")
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int whichButton) {
+            Log.i(Constants.TAG, "Muting " + participant.name);
+            actuallyMute(participant);
+          }})
+        .setNegativeButton(android.R.string.cancel, null).show();
+
+  }
+  private void actuallyMute(Participant participant) {
+    updateTalker(me);
+    if (!talkingSource.isLocal()) {
+      hackSwitchAudio();
     }
   }
 
