@@ -21,7 +21,6 @@ public class SoundRewriter {
         UI_SECONDS * Constants.SAMPLE_RATE_LOCAL_HZ / UI_DOWNSAMPLE, UI_DOWNSAMPLE, newDataCallback);
     activity.attachLocalBuffer(uiOut);
 
-
     AudioSource audioIn = new MicSource();
     audioIn.addSink(uiOut);
     audioIn.addSink(audioOut);

@@ -11,8 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import com.livemic.livemicapp.databinding.ActivityMainBinding;
 import com.livemic.livemicapp.model.Conversation;
@@ -25,7 +23,6 @@ import com.livemic.livemicapp.ui.gl.GLView;
 import java.util.Collection;
 
 public class MainActivity extends AppCompatActivity implements TextChatLog {
-  private SoundRewriter rewriter;
   private GLView sampleView;
 
   // Data models
@@ -45,12 +42,12 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     pager.setAdapter(pagerAdapter);
 
     sampleView = (GLView) findViewById(R.id.sampleView);
-    rewriter = new SoundRewriter();
 
     RecyclerView listView = (RecyclerView) findViewById(R.id.participantList);
     listView.setLayoutManager(new LinearLayoutManager(this));
     listView.setAdapter(new ParticipantListAdapter(this, conversation));
 
+    SoundRewriter rewriter = new SoundRewriter();
     rewriter.start(this, this, new Runnable() {
       @Override
       public void run() {

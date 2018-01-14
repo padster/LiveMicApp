@@ -3,9 +3,11 @@ package com.livemic.livemicapp.ui;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.R;
 import com.livemic.livemicapp.databinding.ListitemParticipantBinding;
 import com.livemic.livemicapp.model.Conversation;
@@ -36,6 +38,7 @@ public class ParticipantListAdapter extends RecyclerView.Adapter<CustomViewHolde
 
   @Override
   public int getItemCount() {
+    Log.i(Constants.TAG, "# People: " + conversation.participantCount());
     return conversation.participantCount();
   }
 }
