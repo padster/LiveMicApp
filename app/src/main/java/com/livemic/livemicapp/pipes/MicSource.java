@@ -35,10 +35,6 @@ public class MicSource extends AudioSource {
         byte[] array = new byte[Constants.REWRITE_CAPACITY];
         while(audioIn != null) {
           int nRead = audioIn.read(array, 0, Constants.REWRITE_CAPACITY, AudioRecord.READ_BLOCKING);
-          double tot = 0;
-          for (int i = 0; i < nRead; i++) {
-            tot += array[i];
-          }
           handleNewSamples(array);
         }
       }
