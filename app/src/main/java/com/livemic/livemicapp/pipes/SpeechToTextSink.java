@@ -111,6 +111,7 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
       downsampled[2 * i + 1] = samples[4 * i + 1];
     }
 
+    /*
     if (isQuiet(downsampled)) {
       if (quietSamplesAllowed == 0) {
         // Already quiet, do nothing
@@ -124,9 +125,10 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
         }
       }
     } else {
-      quietSamplesAllowed = QUIET_SAMPLES_IN_A_ROW;
-      forceConnection().sendAudio(downsampled, newLength);
-    }
+    */
+    quietSamplesAllowed = QUIET_SAMPLES_IN_A_ROW;
+    forceConnection().sendAudio(downsampled, newLength);
+    // }
   }
 
   /** Lazily re-create the connection whenever required. */
