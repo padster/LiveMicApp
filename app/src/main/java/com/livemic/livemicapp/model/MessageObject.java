@@ -42,6 +42,9 @@ public class MessageObject implements Parcelable, Serializable {
     }
 
     public List<Participant> getParticipants() {
+      if (participantNames == null) {
+        return null;
+      }
       List<Participant> result = new ArrayList<>();
       for (String name : participantNames) {
         result.add(new Participant(name));
@@ -87,9 +90,13 @@ public class MessageObject implements Parcelable, Serializable {
         }
     };
 
-    @Override public String toString() {
-        return "MessageObject{" +
-                "audioData=" + Arrays.toString(audioData) +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "MessageObject{" +
+        "audioData=" + Arrays.toString(audioData) +
+        ", participantNames=" + participantNames +
+        ", talkingParticipant='" + talkingParticipant + '\'' +
+        ", pastMessages=" + pastMessages +
+        '}';
+  }
 }

@@ -14,15 +14,14 @@ import com.livemic.livemicapp.pipes.AudioSink;
 public class WiFiDirectSink implements AudioSink {
   private Conversation conversation;
 
-  public void setConversation(Conversation conversation) {
-    // HACK - Conversation needs a direct sink for construction,
-    // direct sink then also needs a conversation.
+  public WiFiDirectSink(Conversation conversation) {
     this.conversation = conversation;
   }
 
   @Override
   public void newSamples(byte[] samples) {
     // Send the samples over wifi
+    Log.i(Constants.TAG, "Samples from sink to wifi");
     conversation.sendSamples(samples);
   }
 

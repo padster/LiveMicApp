@@ -79,11 +79,9 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
   // BIG HACK - this should come from network sharing stuff.
   private Conversation createConversation(boolean localOnly) {
     this.source = null;
-    WiFiDirectSink sink = null;
     boolean isServer = true;
     if (!localOnly) {
       source = new WiFiDirectSource();
-      sink = new WiFiDirectSink();
       isServer = ((LiveMicApp) getApplication()).mIsServer;
     }
 
@@ -97,15 +95,18 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
         isServer, // Whether I'm the moderator
         me,       // My identity
         "P1",     // Name of the current talker
-        // TODO: Wire up wifi connections and attach them in here...
-        source,
-        sink
+        source    // Source of sound coming from other devices
     );
-    if (sink != null) {
-      sink.setConversation(conversation);
-    }
+
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);
+
+    WiFiDirectSink sink = null;
+    Log.i(Constants.TAG, "Local only? " + localOnly);
+    if (!localOnly) {
+      sink = new WiFiDirectSink(testConversation);
+      testConversation.setSink(sink);
+    }
     return testConversation;
   }
 

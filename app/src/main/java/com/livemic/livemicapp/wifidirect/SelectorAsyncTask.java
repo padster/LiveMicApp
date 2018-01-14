@@ -22,6 +22,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.Exchanger;
 
 import static com.livemic.livemicapp.Constants.MSG_BROKEN_CONN;
 import static com.livemic.livemicapp.Constants.MSG_FINISH_CONNECT;
@@ -188,17 +189,16 @@ public class SelectorAsyncTask extends AsyncTask<Void, Void, Void> {
         }
         byte[] bytes = baos.toByteArray();
         Log.i(TAG, "readData : RECV: " + bytes.length + " bytes");
-        if (bytes.length != 8231) {
-          return null;
-        }
 
+        boolean cannotDeserialize = false;
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         ObjectInput in = null;
         Serializable deserializedObject = null;
         try {
             in = new ObjectInputStream(bis);
             deserializedObject = (Serializable) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
+            cannotDeserialize = true;
             e.printStackTrace();
         } finally {
             try {
@@ -209,7 +209,7 @@ public class SelectorAsyncTask extends AsyncTask<Void, Void, Void> {
                 // ignore close exception
             }
         }
-        return deserializedObject;
+        return cannotDeserialize ? null : deserializedObject;
     }
 
     /**

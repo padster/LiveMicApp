@@ -47,21 +47,18 @@ public class Conversation extends BaseObservable {
   private final Participant me;
 
   private final WiFiDirectSource wifiSource;
-  private final WiFiDirectSink wifiSink;
+  private WiFiDirectSink wifiSink;
 
   public Conversation(
       Context ctx,
       boolean amModerator,
       Participant me,
       String currentTalker,
-      WiFiDirectSource wifiSource,
-      WiFiDirectSink wifiSink) {
+      WiFiDirectSource wifiSource) {
     this.ctx = ctx;
     this.amModerator = amModerator;
     this.me = me;
     this.wifiSource = wifiSource;
-    this.wifiSink = wifiSink;
-
     this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
@@ -138,7 +135,9 @@ public class Conversation extends BaseObservable {
   /** New person has joined! */
   public void addParticipant(Participant participant) {
     participants.add(participant);
-    pushChange(MessageUtil.fromParticipants(participants));
+    if (amModerator) {
+      pushChange(MessageUtil.fromParticipants(participants));
+    }
     notifyChange();
   }
   /** Person left :( */
@@ -152,7 +151,9 @@ public class Conversation extends BaseObservable {
     }
     if (matched != null) {
       participants.remove(matched);
-      pushChange(MessageUtil.fromParticipants(participants));
+      if (amModerator) {
+        pushChange(MessageUtil.fromParticipants(participants));
+      }
       notifyChange();
     }
   }
@@ -182,7 +183,9 @@ public class Conversation extends BaseObservable {
     if (previousMessages != null) {
       this.recentMessages.clear();
       this.recentMessages.addAll(previousMessages);
-      pushChange(MessageUtil.fromPastMessages(new ArrayList<>(previousMessages)));
+      if (amModerator) {
+        pushChange(MessageUtil.fromPastMessages(new ArrayList<>(previousMessages)));
+      }
       changed = true;
     }
     if (currentMessage != null) {
@@ -249,7 +252,7 @@ public class Conversation extends BaseObservable {
 
   /** Pushes a conversation metadata change to all clients. */
   private void pushChange(MessageObject message) {
-    if (!amModerator) {
+    if (!MessageUtil.isSamples(message) && !amModerator) {
       throw new IllegalStateException("Only moderator can push metadata");
     };
     Log.d(Constants.TAG, "pushOutMessage : " + message.toString());
@@ -285,5 +288,14 @@ public class Conversation extends BaseObservable {
       recentMessages.addAll(pastMessages);
     }
     notifyChange();
+  }
+
+  // HACK - Conversation needs a direct sink for construction,
+  // direct sink then also needs a conversation.
+  public void setSink(WiFiDirectSink sink) {
+    this.wifiSink = sink;
+    if (talkingSource.isLocal()) {
+      talkingSource.attachToNewWiFiSink(sink);
+    }
   }
 }

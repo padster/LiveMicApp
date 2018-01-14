@@ -209,7 +209,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
         public void run() {
           HACKpeersAvailableDelayed(peerList);
         }
-      }, 50);
+      }, 20);
     }
 
     private void HACKpeersAvailableDelayed(WifiP2pDeviceList peerList) {
@@ -370,7 +370,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
      */
     private Serializable onPullInData(SocketChannel schannel, Bundle b) {
         Serializable data = b.getSerializable(Constants.KEY_DATA);
-//        Log.d(TAG, "onDataIn : recvd msg : " + data);
+        Log.d(TAG, "onDataIn : recvd msg : " + data);
         mConnMan.onDataIn(schannel, data);  // pub to all client if this device is server.
         MessageObject msg = (MessageObject) data;
 
