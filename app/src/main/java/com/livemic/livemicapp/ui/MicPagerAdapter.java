@@ -7,10 +7,12 @@ import android.view.View;
 
 import com.livemic.livemicapp.R;
 
+/** Adapter for the tabs in the main activity - lets us use layouts in the same file. */
 public class MicPagerAdapter extends PagerAdapter {
-  private final Activity ctx;
+  // Names of the tabs, can't easily use the ones in the layout :(
   private static final String[] TITLES = new String[]{"Speaker", "Audience"};
 
+  private final Activity ctx;
   public MicPagerAdapter(Activity ctx) {
     this.ctx = ctx;
   }
