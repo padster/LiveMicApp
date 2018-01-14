@@ -41,6 +41,6 @@ public class MicSource extends AudioSource {
           handleNewSamples(array);
         }
       }
-    }, 0, UPDATE_MS);
+    }, 0);
   }
 }
