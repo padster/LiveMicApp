@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import com.livemic.livemicapp.model.MessageObject;
+import com.livemic.livemicapp.model.MessageUtil;
 import com.livemic.livemicapp.wifidirect.WorkHandler;
 
 import java.io.Serializable;
@@ -373,19 +374,9 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
         mConnMan.onDataIn(schannel, data);  // pub to all client if this device is server.
         MessageObject msg = (MessageObject) data;
 
-        byte[] samples = msg.getAudioData();
-        if (samples != null) {
-          Log.d(TAG, "RECV> " + samples.length + " bytes");
-          if (mActivity != null) {
-            // HACK - spaghetti code
-            mActivity.updateWithSamples(samples);
-          }
+        if (mActivity != null) {
+          mActivity.handleMessageReceived(msg);
         }
-
-        // TODO play audio
-//        showNotification(row);
-        // add to activity if it is on focus.
-//        showInActivity(row);
         return data;
     }
 
