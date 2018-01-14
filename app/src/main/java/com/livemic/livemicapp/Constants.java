@@ -10,4 +10,7 @@ public class Constants {
   public static int SAMPLE_RATE_NETWORK_HZ = 16000;
 
   public static int REWRITE_CAPACITY = 8128;
+
+  // Turn on for dalek-ification.
+  public static final boolean EASTER_EGG = false;
 }

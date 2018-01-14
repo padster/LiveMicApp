@@ -6,13 +6,14 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.livemic.livemicapp.Constants;
+import com.livemic.livemicapp.effects.DalekEffect;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 /** Source of audio coming from phone mic. */
 public class MicSource extends AudioSource {
-  public static final int UPDATE_MS = 20;
+  private static final DalekEffect EFFECT = new DalekEffect();
 
   private final Timer timer = new Timer();
   private AudioRecord audioIn;
@@ -35,6 +36,9 @@ public class MicSource extends AudioSource {
         byte[] array = new byte[Constants.REWRITE_CAPACITY];
         while(audioIn != null) {
           int nRead = audioIn.read(array, 0, Constants.REWRITE_CAPACITY, AudioRecord.READ_BLOCKING);
+          if (Constants.EASTER_EGG) {
+            array = EFFECT.newSampleBytes(array);
+          }
           handleNewSamples(array);
         }
       }
