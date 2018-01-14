@@ -31,13 +31,13 @@ public class Conversation extends BaseObservable {
   private String currentMessage;
   private final List<String> recentMessages;
 
-  private boolean amModerator;
+  private boolean moderator;
 
   public Conversation(
-      boolean amModerator,
+      boolean moderator,
       String currentTalker,
       MicSource localSource) {
-    this.amModerator = amModerator;
+    this.moderator = moderator;
     this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
@@ -54,6 +54,11 @@ public class Conversation extends BaseObservable {
   /** @return Audio source for the conversation, can be from wherever. */
   public AudioSource getAudioSource() {
     return this.talkingSource;
+  }
+
+  /** @return Whether the local user is the moderator of the conversation. */
+  public boolean isModerator() {
+    return moderator;
   }
 
   /** @return Participant in a particular position. */

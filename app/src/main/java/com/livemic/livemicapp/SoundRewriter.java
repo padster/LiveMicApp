@@ -18,7 +18,6 @@ public class SoundRewriter {
       MainActivity activity,
       Conversation conversation,
       Runnable newDataCallback) {
-    AudioSink speechToText = new SpeechToTextSink(activity, conversation);
     AudioSink audioOut = new SpeakerSink();
 
     RecentSamplesBuffer uiOut = new RecentSamplesBuffer(
@@ -27,7 +26,11 @@ public class SoundRewriter {
 
     conversation.getAudioSource().addSink(uiOut);
     conversation.getAudioSource().addSink(audioOut);
-    conversation.getAudioSource().addSink(speechToText);
+
+    if (conversation.isModerator()) {
+      AudioSink speechToText = new SpeechToTextSink(activity, conversation);
+      conversation.getAudioSource().addSink(speechToText);
+    }
   }
 }
 
