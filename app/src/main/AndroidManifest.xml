@@ -24,7 +24,10 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="reversePortrait">
         </activity>
-        <activity android:name=".WiFiDirectActivity">
+        <activity
+            android:name=".WiFiDirectActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="reversePortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

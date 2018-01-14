@@ -26,6 +26,10 @@ public class MessageObject implements Parcelable, Serializable {
         readFromParcel(in);
     }
 
+    public byte[] getAudioData() {
+      return this.audioData;
+    }
+
 
     @Override public int describeContents() {
         return 0;

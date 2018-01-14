@@ -8,8 +8,10 @@ import android.util.Log;
 
 import com.livemic.livemicapp.ConnectionService;
 import com.livemic.livemicapp.Constants;
+import com.livemic.livemicapp.model.MessageObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
@@ -134,6 +136,7 @@ public class SelectorAsyncTask extends AsyncTask<Void, Void, Void> {
         Serializable data = readData(schannel);
         if (data != null) {
             Bundle b = new Bundle();
+//            Log.d(TAG, "doReadable : " + (MessageObject) data);
             b.putSerializable(Constants.KEY_DATA, data);
             notifyConnectionService(MSG_PULLIN_DATA, schannel, b);
         }
@@ -143,11 +146,16 @@ public class SelectorAsyncTask extends AsyncTask<Void, Void, Void> {
      * read data when OP_READ event
      */
     public Serializable readData(SocketChannel sChannel) {
-        ByteBuffer buf = ByteBuffer.allocate(1024 * 4);   // let's cap json string to 4k for now.
-        byte[] bytes = null;
+        ByteBuffer buf = ByteBuffer.allocate(1024 * 10);   // let's cap json string to 10k for now.
 
-        try {
+        // Each packet should be ~8kb
+//        byte[] bytes = null;
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+      try {
             buf.clear();  // Clear the buffer and read bytes from socket
+
+            /*
             int numBytesRead = sChannel.read(buf);
             if (numBytesRead == -1) {
                 // read -1 means socket channel is broken. remove it from the selector
@@ -163,10 +171,27 @@ public class SelectorAsyncTask extends AsyncTask<Void, Void, Void> {
                 buf.get(bytes);
                 // while ( buf.hasRemaining() ) buf.get();
             }
+            */
+            int read;
+            while( (read = sChannel.read(buf)) > 0 ) {
+              buf.flip();
+              byte[] bytesLocal = new byte[buf.limit()];
+              buf.get(bytesLocal);
+              baos.write(bytesLocal);
+              buf.clear();
+            }
+
+
         } catch (Exception e) {
             Log.e(TAG, "readData : exception: " + e.toString());
             notifyConnectionService(MSG_BROKEN_CONN, sChannel, null);
         }
+        byte[] bytes = baos.toByteArray();
+        Log.i(TAG, "readData : RECV: " + bytes.length + " bytes");
+        if (bytes.length != 8231) {
+          return null;
+        }
+
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         ObjectInput in = null;
         Serializable deserializedObject = null;

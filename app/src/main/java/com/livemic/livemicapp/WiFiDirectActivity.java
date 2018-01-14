@@ -16,9 +16,11 @@
 
 package com.livemic.livemicapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -27,6 +29,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -34,6 +38,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -45,6 +52,17 @@ import android.widget.Toast;
  */
 public class WiFiDirectActivity extends AppCompatActivity implements DeviceListFragment.DeviceActionListener {
 
+  String[] permissions = new String[]{
+      Manifest.permission.RECORD_AUDIO,
+      Manifest.permission.ACCESS_WIFI_STATE,
+      Manifest.permission.CHANGE_WIFI_STATE,
+      Manifest.permission.CHANGE_NETWORK_STATE,
+      Manifest.permission.INTERNET,
+      Manifest.permission.ACCESS_NETWORK_STATE,
+      Manifest.permission.READ_PHONE_STATE,
+      Manifest.permission.WRITE_EXTERNAL_STORAGE
+  };
+
     public static final String TAG = "PTP_Activity";
 
     LiveMicApp mApp = null;
@@ -55,7 +73,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        maybeRequestPermissions();
+
         setContentView(R.layout.launch_connect);   // statically draw two <fragment class=>
+
 
         mApp = (LiveMicApp) getApplication();
 
@@ -260,7 +282,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
             @Override
             public void onSuccess() {
                 // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                Log.i(TAG, "Succesfully connected");
+                Log.i(TAG, "Successfully connected");
                 Toast.makeText(WiFiDirectActivity.this, "Connect success..", Toast.LENGTH_SHORT).show();
             }
 
@@ -363,5 +385,54 @@ public class WiFiDirectActivity extends AppCompatActivity implements DeviceListF
                 startActivity(i);
             }
         });
+    }
+
+
+    ///
+    // Permissions stuff
+    ///
+    private void maybeRequestPermissions() {
+      //check API version, do nothing if API version < 23!
+      int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+      if (currentapiVersion > android.os.Build.VERSION_CODES.LOLLIPOP){
+        List<String> needed = new ArrayList<>();
+        for (String permission : permissions) {
+          if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            needed.add(permission);
+          }
+        }
+        if (!needed.isEmpty()) {
+          String[] asArray = needed.toArray(new String[0]);
+          ActivityCompat.requestPermissions(this, asArray, 1);
+        }
+
+      /*
+      if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
+          // Show an expanation to the user *asynchronously* -- don't block
+          // this thread waiting for the user's response! After the user
+          // sees the explanation, try again to request the permission.
+        } else {
+          ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+        }
+      }
+      */
+      }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+      switch (requestCode) {
+        case 1: {
+          // If request is cancelled, the result arrays are empty.
+          if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.d("Activity", "Granted!");
+          } else {
+            Log.d("Activity", "Denied!");
+            finish();
+          }
+          return;
+        }
+      }
     }
 }

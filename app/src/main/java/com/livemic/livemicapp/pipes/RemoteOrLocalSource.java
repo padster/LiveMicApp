@@ -1,7 +1,9 @@
 package com.livemic.livemicapp.pipes;
 
 import android.support.v4.util.Preconditions;
+import android.util.Log;
 
+import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.pipes.wifi.WiFiDirectSource;
 
 /** Source that is backed by at most one of: a local source (mic) or remote source (wifi). */
@@ -33,6 +35,7 @@ public class RemoteOrLocalSource extends AudioSource implements AudioSink {
 
   /** Switch to forwarding from a new remote source. */
   public void switchToRemoteSource(WiFiDirectSource newRemoteSource) {
+    Log.i(Constants.TAG, "remoteSource: switching to use");
     if (localSource != null) {
       localSource.stop();
       localSource.removeSink(this);
@@ -46,6 +49,7 @@ public class RemoteOrLocalSource extends AudioSource implements AudioSink {
     remoteSource = newRemoteSource;
     if (remoteSource != null) {
       // NOTE: null is fine here, it means no source.
+      Log.i(Constants.TAG, "remoteSource: connecting this as a sink");
       remoteSource.addSink(this);
     }
   }

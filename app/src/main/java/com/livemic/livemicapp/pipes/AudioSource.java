@@ -1,5 +1,9 @@
 package com.livemic.livemicapp.pipes;
 
+import android.util.Log;
+
+import com.livemic.livemicapp.Constants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +14,7 @@ public class AudioSource {
   /** Each source should call this when they get new data.  */
   protected void handleNewSamples(byte[] samples) {
     for (AudioSink sink : sinks) {
+      Log.i(Constants.TAG, "TALK to " + sink.getClass().getName());
       sink.newSamples(samples);
     }
   }

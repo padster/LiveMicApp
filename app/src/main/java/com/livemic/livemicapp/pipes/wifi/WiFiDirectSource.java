@@ -9,4 +9,8 @@ public class WiFiDirectSource extends AudioSource {
   public void stop() {
     // TODO
   }
+
+  public void updateWithRemoteSamples(byte[] samples) {
+    handleNewSamples(samples);
+  }
 }
