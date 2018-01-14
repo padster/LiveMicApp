@@ -62,8 +62,7 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
 
   @Override
   public void handleChatText(String currentMessage, Collection<String> previousMessages) {
-    TextView tv = (TextView) findViewById(R.id.messageLog);
-    tv.setText(currentMessage);
+    conversation.updateMessages(currentMessage, previousMessages);
   }
 
   // HACK - hook up local audio sink to UI

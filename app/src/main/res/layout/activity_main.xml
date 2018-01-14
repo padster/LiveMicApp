@@ -73,6 +73,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/speakerName"
                     />
 
+                <!-- HACK - make list view instead? -->
                 <TextView
                     android:id="@+id/messageLog"
                     android:layout_width="0dp"
@@ -83,7 +84,7 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
                     android:inputType="textMultiLine"
-                    android:text="TextView"
+                    android:text="@{conversation.formattedMessageLog()}"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"

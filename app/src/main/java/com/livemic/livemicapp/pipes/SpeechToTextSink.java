@@ -9,6 +9,7 @@ import com.livemic.livemicapp.TextChatLog;
 import com.microsoft.cognitiveservices.speechrecognition.DataRecognitionClient;
 import com.microsoft.cognitiveservices.speechrecognition.ISpeechRecognitionServerEvents;
 import com.microsoft.cognitiveservices.speechrecognition.RecognitionResult;
+import com.microsoft.cognitiveservices.speechrecognition.RecognitionStatus;
 import com.microsoft.cognitiveservices.speechrecognition.RecognizedPhrase;
 import com.microsoft.cognitiveservices.speechrecognition.SpeechAudioFormat;
 import com.microsoft.cognitiveservices.speechrecognition.SpeechRecognitionMode;
@@ -29,7 +30,6 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
   public SpeechToTextSink(Activity activity, TextChatLog textLog) {
     this.activity = activity;
     this.textLog = textLog;
-    Log.i(Constants.TAG, "STT CREATED");
     dataClient = SpeechRecognitionServiceFactory.createDataClient(
         activity,
         this.getMode(),
@@ -70,14 +70,17 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
   @Override
   public void onFinalResponseReceived(RecognitionResult recognitionResult) {
     Log.i(Constants.TAG, "FINAL > " + recognitionResult.Results.length);
-    for (RecognizedPhrase phrase : recognitionResult.Results) {
-      recentMessages.addLast(phrase.DisplayText);
+    if (recognitionResult.RecognitionStatus == RecognitionStatus.RecognitionSuccess) {
+      if (recognitionResult.Results.length > 0) {
+        Log.i(Constants.TAG, "ADDED > " + recognitionResult.Results[recognitionResult.Results.length - 1].DisplayText);
+        recentMessages.addFirst(recognitionResult.Results[recognitionResult.Results.length - 1].DisplayText);
+      }
+      while (recentMessages.size() > 10) {
+        recentMessages.removeLast();
+      }
+      currentMessage = "";
+      updateTextLog();
     }
-    while (recentMessages.size() > 15) {
-      recentMessages.removeFirst();
-    }
-    currentMessage = "";
-    updateTextLog();
   }
 
   @Override
@@ -99,7 +102,7 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
   @Override
   public void newSamples(byte[] samples) {
     // Need to downsample PCM 16bit 32khz -> 16khz
-    Log.i(Constants.TAG, "SENDING SAMPLES");
+    Log.v(Constants.TAG, "SENDING SAMPLES");
     int newLength = samples.length / 2;
     byte[] downsampled = new byte[samples.length / 2];
     for (int i = 0; i < newLength / 2; i++) {

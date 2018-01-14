@@ -36,7 +36,7 @@ public class SpeakerSink implements AudioSink {
       tot += sample;
     }
 
-    Log.i(Constants.TAG, tot + "   -- Sent " + samples.length + " bytes.");
+    Log.v(Constants.TAG, tot + "   -- Sent " + samples.length + " bytes.");
 
   }
 }
