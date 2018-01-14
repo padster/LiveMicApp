@@ -15,7 +15,6 @@ public class Util {
   // Convert milliseconds to something that looks like 11m40s
   public static String formatTalkTime(long durationMs) {
     int durationSec = (int)(durationMs / 1000);
-    Log.i(Constants.TAG, "Duration sec: " + durationSec);
     if (durationSec < 60) {
       return durationSec + "s";
     }
