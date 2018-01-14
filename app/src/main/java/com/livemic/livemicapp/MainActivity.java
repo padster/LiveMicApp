@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -14,6 +15,7 @@ import android.util.Log;
 
 import com.livemic.livemicapp.databinding.ActivityMainBinding;
 import com.livemic.livemicapp.model.Conversation;
+import com.livemic.livemicapp.model.MessageObject;
 import com.livemic.livemicapp.model.Participant;
 import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
@@ -22,6 +24,8 @@ import com.livemic.livemicapp.ui.ParticipantListAdapter;
 import com.livemic.livemicapp.ui.gl.GLView;
 
 import java.util.Collection;
+
+import static com.livemic.livemicapp.Constants.MSG_PUSHOUT_DATA;
 
 public class MainActivity extends AppCompatActivity implements TextChatLog {
   private GLView sampleView;
@@ -118,6 +122,17 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);
     return testConversation;
+  }
+
+  /**
+   * post send msg to service to handle it in background.
+   */
+  public void pushOutMessage(MessageObject obj) {
+    Log.d(Constants.TAG, "pushOutMessage : " + obj.toString());
+    Message msg = ConnectionService.getInstance().getHandler().obtainMessage();
+    msg.what = MSG_PUSHOUT_DATA;
+    msg.obj = obj;
+    ConnectionService.getInstance().getHandler().sendMessage(msg);
   }
 
 }

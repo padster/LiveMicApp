@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LiveMicApp.iml" filepath="$PROJECT_DIR$/LiveMicApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/LiveMicAppChanges.iml" filepath="$PROJECT_DIR$/LiveMicAppChanges.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
