@@ -15,6 +15,7 @@ import android.util.Log;
 import com.livemic.livemicapp.databinding.ActivityMainBinding;
 import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.model.Participant;
+import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
 import com.livemic.livemicapp.ui.MicPagerAdapter;
 import com.livemic.livemicapp.ui.ParticipantListAdapter;
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     listView.setAdapter(new ParticipantListAdapter(this, conversation));
 
     SoundRewriter rewriter = new SoundRewriter();
-    rewriter.start(this, this, new Runnable() {
+    rewriter.start(this, conversation, new Runnable() {
       @Override
       public void run() {
         conversation.notifyChange();
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     Conversation testConversation = new Conversation(
         true,
         "P1",
-        null);
+        new MicSource());
 
     // HACK
     Participant p1 = new Participant("P1");

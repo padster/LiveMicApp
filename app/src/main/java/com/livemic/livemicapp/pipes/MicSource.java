@@ -14,8 +14,8 @@ import java.util.TimerTask;
 public class MicSource extends AudioSource {
   public static final int UPDATE_MS = 20;
 
-  private final AudioRecord audioIn;
   private final Timer timer = new Timer();
+  private AudioRecord audioIn;
 
   public MicSource() {
     audioIn = new AudioRecord.Builder()
@@ -28,11 +28,12 @@ public class MicSource extends AudioSource {
         .setBufferSizeInBytes(2 * Constants.REWRITE_CAPACITY)
         .build();
     audioIn.startRecording();
+
     timer.schedule(new TimerTask() {
       @Override public void run() {
         Log.i(Constants.TAG, "Starting rewrite loop...");
         byte[] array = new byte[Constants.REWRITE_CAPACITY];
-        while(true) {
+        while(audioIn != null) {
           int nRead = audioIn.read(array, 0, Constants.REWRITE_CAPACITY, AudioRecord.READ_BLOCKING);
           double tot = 0;
           for (int i = 0; i < nRead; i++) {
@@ -42,5 +43,12 @@ public class MicSource extends AudioSource {
         }
       }
     }, 0);
+  }
+
+  /** Stop listening to the mic - destroyed, create a new MicSource after this. */
+  public void stop() {
+    timer.cancel();
+    audioIn.stop();
+    audioIn = null;
   }
 }

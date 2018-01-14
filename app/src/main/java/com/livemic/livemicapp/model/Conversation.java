@@ -1,9 +1,15 @@
 package com.livemic.livemicapp.model;
 
 import android.databinding.BaseObservable;
+import android.util.Log;
 
+import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.Util;
+import com.livemic.livemicapp.pipes.AudioSink;
 import com.livemic.livemicapp.pipes.AudioSource;
+import com.livemic.livemicapp.pipes.MicSource;
+import com.livemic.livemicapp.pipes.RemoteOrLocalSource;
+import com.livemic.livemicapp.pipes.wifi.WiFiDirectSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +21,8 @@ import java.util.List;
 public class Conversation extends BaseObservable {
   // NOTE: IN PROGRESS!
   // Needs to be cleaned up a lot...
+  private final RemoteOrLocalSource talkingSource = new RemoteOrLocalSource();
+
   private final List<Participant> participants;
 
   private String currentTalker;
@@ -24,27 +32,38 @@ public class Conversation extends BaseObservable {
   private final List<String> recentMessages;
 
   private boolean amModerator;
-  private AudioSource talkingSource;
 
   public Conversation(
       boolean amModerator,
       String currentTalker,
-      AudioSource talkingSource) {
+      MicSource localSource) {
     this.amModerator = amModerator;
-    this.participants = new ArrayList<Participant>();
+    this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
-    this.talkingSource = talkingSource;
-    this.recentMessages = new ArrayList<String>();
+    this.recentMessages = new ArrayList<>();
+    if (localSource != null) {
+      talkingSource.switchToLocalSource(localSource);
+    }
   }
 
   //
   // Accessors
   //
 
+  /** @return Audio source for the conversation, can be from wherever. */
+  public AudioSource getAudioSource() {
+    return this.talkingSource;
+  }
+
   /** @return Participant in a particular position. */
   public Participant getParticipant(int position) {
     return participants.get(position);
+  }
+
+  /** @return Whether the sound data is coming from the device. */
+  public boolean isLocalAudio() {
+    return talkingSource.isLocal();
   }
 
   /** @return Number of participants. */
@@ -129,5 +148,15 @@ public class Conversation extends BaseObservable {
   // TODO - proper stuff...
   public void selectParticipant(Participant participant) {
     updateTalker(participant);
+  }
+
+  public void hackSwitchAudio() {
+    Log.i(Constants.TAG, "Switching from " + (talkingSource.isLocal() ? " local" : " remote"));
+    if (talkingSource.isLocal()) {
+      talkingSource.switchToRemoteSource(new WiFiDirectSource());
+    } else {
+      talkingSource.switchToLocalSource(new MicSource());
+    }
+    notifyChange();
   }
 }

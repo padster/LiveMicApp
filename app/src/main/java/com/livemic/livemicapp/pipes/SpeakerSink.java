@@ -29,6 +29,10 @@ public class SpeakerSink implements AudioSink {
 
   @Override
   public void newSamples(byte[] samples) {
+    if (audioOut == null) {
+      Log.d(Constants.TAG, "SPEAKER SINK DEAD, need to remove it from its source.");
+    }
+
     // TODO - pass in length / initial offset too? Needed if switching to non-blocking.
     audioOut.write(samples, 0, samples.length);
     double tot = 0;
@@ -37,6 +41,10 @@ public class SpeakerSink implements AudioSink {
     }
 
     Log.v(Constants.TAG, tot + "   -- Sent " + samples.length + " bytes.");
+  }
 
+  /** Stop sending to sink - after these need to create a new one. */
+  public void stop() {
+    audioOut.stop();
   }
 }

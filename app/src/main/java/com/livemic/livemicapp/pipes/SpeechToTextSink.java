@@ -6,6 +6,7 @@ import android.util.Log;
 import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.TextChatLog;
 import com.livemic.livemicapp.Util;
+import com.livemic.livemicapp.model.Conversation;
 import com.microsoft.cognitiveservices.speechrecognition.DataRecognitionClient;
 import com.microsoft.cognitiveservices.speechrecognition.ISpeechRecognitionServerEvents;
 import com.microsoft.cognitiveservices.speechrecognition.RecognitionResult;
@@ -25,21 +26,21 @@ public class SpeechToTextSink implements ISpeechRecognitionServerEvents, AudioSi
   private final Deque<String> recentMessages = new ArrayDeque<>();
 
   private final Activity activity;
-  private final TextChatLog textLog;
+  private final Conversation conversation;
   private String currentMessage = "";
   private DataRecognitionClient dataClient;
   private int quietSamplesAllowed;
 
-  public SpeechToTextSink(Activity activity, TextChatLog textLog) {
+  public SpeechToTextSink(Activity activity, Conversation conversation) {
     this.activity = activity;
-    this.textLog = textLog;
+    this.conversation = conversation;
   }
 
   private void updateTextLog() {
     activity.runOnUiThread(new Runnable() {
       @Override
       public void run() {
-        textLog.handleChatText(currentMessage, recentMessages);
+        conversation.updateMessages(currentMessage, recentMessages);
       }
     });
   }

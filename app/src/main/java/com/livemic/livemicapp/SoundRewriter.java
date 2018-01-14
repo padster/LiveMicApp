@@ -1,5 +1,6 @@
 package com.livemic.livemicapp;
 
+import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.pipes.AudioSink;
 import com.livemic.livemicapp.pipes.AudioSource;
 import com.livemic.livemicapp.pipes.MicSource;
@@ -13,18 +14,20 @@ public class SoundRewriter {
   private static final int UI_DOWNSAMPLE = 4;
 
   // Create all initial pipes and hook them together.
-  public void start(MainActivity activity, TextChatLog messageLog, Runnable newDataCallback) {
-    AudioSink speechToText = new SpeechToTextSink(activity, messageLog);
+  public void start(
+      MainActivity activity,
+      Conversation conversation,
+      Runnable newDataCallback) {
+    AudioSink speechToText = new SpeechToTextSink(activity, conversation);
     AudioSink audioOut = new SpeakerSink();
 
     RecentSamplesBuffer uiOut = new RecentSamplesBuffer(
         UI_SECONDS * Constants.SAMPLE_RATE_LOCAL_HZ / UI_DOWNSAMPLE, UI_DOWNSAMPLE, newDataCallback);
     activity.attachLocalBuffer(uiOut);
 
-    AudioSource audioIn = new MicSource();
-    audioIn.addSink(uiOut);
-    audioIn.addSink(audioOut);
-    audioIn.addSink(speechToText);
+    conversation.getAudioSource().addSink(uiOut);
+    conversation.getAudioSource().addSink(audioOut);
+    conversation.getAudioSource().addSink(speechToText);
   }
 }
 
