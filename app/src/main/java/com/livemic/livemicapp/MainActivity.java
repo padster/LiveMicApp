@@ -4,11 +4,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.livemic.livemicapp.ui.MicPagerAdapter;
 
 import java.util.Collection;
 
@@ -20,6 +23,10 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     maybeRequestRecordAudioPermission();
+
+    MicPagerAdapter pagerAdapter = new MicPagerAdapter(this);
+    ViewPager pager = (ViewPager) findViewById(R.id.mainPager);
+    pager.setAdapter(pagerAdapter);
 
     rewriter = new SoundRewriter();
   }
