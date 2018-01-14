@@ -40,6 +40,7 @@ public class Conversation extends BaseObservable {
 
   private boolean amModerator;
   private final Participant me;
+
   private final WiFiDirectSource wifiSource;
   private final WiFiDirectSink wifiSink;
 
@@ -154,7 +155,7 @@ public class Conversation extends BaseObservable {
     boolean talkerIsMe = me.name.equals(currentTalker);
     boolean talkIsLocal = talkingSource.isLocal();
     if (talkerIsMe != talkIsLocal) {
-      hackSwitchAudio();
+      switchAudioSource();
     }
     notifyChange();
   }
@@ -197,18 +198,20 @@ public class Conversation extends BaseObservable {
   private void actuallyMute(Participant participant) {
     updateTalker(me);
     if (!talkingSource.isLocal()) {
-      hackSwitchAudio();
+      switchAudioSource();
     }
   }
 
   // HACK
 
   // TODO - proper stuff...
-  public void selectParticipant(Participant participant) {
-    updateTalker(participant);
+  public void maybeSelectParticipant(Participant participant) {
+    if (amModerator) {
+      updateTalker(participant);
+    }
   }
 
-  public void hackSwitchAudio() {
+  public void switchAudioSource() {
     Log.i(Constants.TAG, "Switching from " + (talkingSource.isLocal() ? " local" : " remote"));
     if (talkingSource.isLocal()) {
       talkingSource.switchToRemoteSource(wifiSource);

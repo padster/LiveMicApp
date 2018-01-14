@@ -92,15 +92,6 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/speakerName"
                     />
-
-                <Button
-                    android:id="@+id/hackSwitchSource"
-                    android:text='@{conversation.isLocalAudio() ? "Local" : "Remote"}'
-                    android:onClick='@{() -> conversation.hackSwitchAudio()}'
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    />
             </android.support.constraint.ConstraintLayout>
 
             <android.support.constraint.ConstraintLayout

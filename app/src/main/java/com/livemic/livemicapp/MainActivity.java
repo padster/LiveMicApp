@@ -22,6 +22,7 @@ import com.livemic.livemicapp.ui.gl.GLView;
 
 import java.util.Collection;
 
+import static com.livemic.livemicapp.Constants.LOCAL_ONLY_TAG;
 import static com.livemic.livemicapp.Constants.MSG_PUSHOUT_DATA;
 import static com.livemic.livemicapp.Constants.MSG_REGISTER_ACTIVITY;
 
@@ -38,9 +39,9 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    boolean USE_WIFI = true;
+    boolean localOnly = getIntent().hasExtra(LOCAL_ONLY_TAG);
+    conversation = createConversation(localOnly);
 
-    conversation = hackTestConversation(USE_WIFI);
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
     binding.setConversation(conversation);
 
@@ -75,15 +76,15 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
   }
 
   // BIG HACK - this should come from network sharing stuff.
-  private Conversation hackTestConversation(boolean withWiFi) {
+  private Conversation createConversation(boolean localOnly) {
     this.source = null;
     WiFiDirectSink sink = null;
-    if (withWiFi) {
+    boolean isServer = true;
+    if (!localOnly) {
       source = new WiFiDirectSource();
       sink = new WiFiDirectSink(this);
+      isServer = ((LiveMicApp) getApplication()).mIsServer;
     }
-
-    boolean isServer = ((LiveMicApp) getApplication()).mIsServer;
 
     // HACK
     Participant p1 = new Participant("P1");
