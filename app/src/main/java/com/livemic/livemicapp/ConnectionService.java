@@ -314,7 +314,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
                 break;
             case MSG_PUSHOUT_DATA:
                 Log.d(TAG, "processMessage: onPushOutData...");
-                onPushOutData((String) msg.obj);
+                onPushOutData((Serializable) msg.obj);
                 break;
             case MSG_SELECT_ERROR:
                 Log.d(TAG, "processMessage: onSelectorError...");
@@ -361,7 +361,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
      * If the sender is the server, pub to all client.
      * If the sender is client, only can send to the server.
      */
-    private void onPushOutData(String data) {
+    private void onPushOutData(Serializable data) {
         Log.d(TAG, "onPushOutData : " + data);
         mConnMan.pushOutData(data);
     }
