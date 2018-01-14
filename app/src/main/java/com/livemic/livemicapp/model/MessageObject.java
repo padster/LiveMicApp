@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Created by Prayansh on 2018-01-13.
@@ -52,4 +53,9 @@ public class MessageObject implements Parcelable, Serializable {
         }
     };
 
+    @Override public String toString() {
+        return "MessageObject{" +
+                "audioData=" + Arrays.toString(audioData) +
+                '}';
+    }
 }
