@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.MainActivity;
+import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.pipes.AudioSink;
 
 
@@ -11,16 +12,17 @@ import com.livemic.livemicapp.pipes.AudioSink;
  * Sink that takes samples coming in and sends them out over WiFi direct.
  */
 public class WiFiDirectSink implements AudioSink {
-  private final MainActivity activity;
+  private Conversation conversation;
 
-  public WiFiDirectSink(MainActivity activity) {
-    this.activity = activity;
+  public WiFiDirectSink(Conversation conversation) {
+    this.conversation = conversation;
   }
 
   @Override
   public void newSamples(byte[] samples) {
     // Send the samples over wifi
-    activity.sendSamples(samples);
+    Log.i(Constants.TAG, "Samples from sink to wifi");
+    conversation.sendSamples(samples);
   }
 
   public void stop() {

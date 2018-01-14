@@ -25,10 +25,10 @@ public class SoundRewriter {
     conversation.getAudioSource().addSink(uiOut);
     conversation.getAudioSource().addSink(audioOut);
 
-    if (conversation.amModerator()) {
-      AudioSink speechToText = new SpeechToTextSink(activity, conversation);
-      conversation.getAudioSource().addSink(speechToText);
-    }
+//    if (conversation.amModerator()) {
+//      AudioSink speechToText = new SpeechToTextSink(activity, conversation);
+//      conversation.getAudioSource().addSink(speechToText);
+//    }
   }
 }
 

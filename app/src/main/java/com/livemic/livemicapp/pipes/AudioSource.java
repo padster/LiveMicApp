@@ -13,8 +13,9 @@ public class AudioSource {
 
   /** Each source should call this when they get new data.  */
   protected void handleNewSamples(byte[] samples) {
-    for (AudioSink sink : sinks) {
-      Log.i(Constants.TAG, "TALK to " + sink.getClass().getName());
+    List<AudioSink> copiedSinks = new ArrayList<>(sinks);
+    for (AudioSink sink : copiedSinks) {
+//      Log.i(Constants.TAG, "TALK to " + sink.getClass().getName());
       sink.newSamples(samples);
     }
   }

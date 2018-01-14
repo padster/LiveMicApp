@@ -12,6 +12,7 @@ import android.util.Log;
 import com.livemic.livemicapp.databinding.ActivityMainBinding;
 import com.livemic.livemicapp.model.Conversation;
 import com.livemic.livemicapp.model.MessageObject;
+import com.livemic.livemicapp.model.MessageUtil;
 import com.livemic.livemicapp.model.Participant;
 import com.livemic.livemicapp.pipes.RecentSamplesBuffer;
 import com.livemic.livemicapp.pipes.wifi.WiFiDirectSink;
@@ -78,11 +79,9 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
   // BIG HACK - this should come from network sharing stuff.
   private Conversation createConversation(boolean localOnly) {
     this.source = null;
-    WiFiDirectSink sink = null;
     boolean isServer = true;
     if (!localOnly) {
       source = new WiFiDirectSource();
-      sink = new WiFiDirectSink(this);
       isServer = ((LiveMicApp) getApplication()).mIsServer;
     }
 
@@ -96,35 +95,24 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
         isServer, // Whether I'm the moderator
         me,       // My identity
         "P1",     // Name of the current talker
-        // TODO: Wire up wifi connections and attach them in here...
-        source,
-        sink
+        source    // Source of sound coming from other devices
     );
+
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);
+
+    WiFiDirectSink sink = null;
+    Log.i(Constants.TAG, "Local only? " + localOnly);
+    if (!localOnly) {
+      sink = new WiFiDirectSink(testConversation);
+      testConversation.setSink(sink);
+    }
     return testConversation;
   }
 
-  // Send Bytes across wifi
-  public void sendSamples(byte[] audioData) {
-    MessageObject msg = new MessageObject(audioData);
-    pushOutMessage(msg);
-  }
 
-  /** Common code to push payload to service to handle it in background. */
-  private void pushOutMessage(MessageObject obj) {
-    Log.d(Constants.TAG, "pushOutMessage : " + obj.toString());
-    Message msg = ConnectionService.getInstance().getHandler().obtainMessage();
-    msg.what = MSG_PUSHOUT_DATA;
-    msg.obj = obj;
-    ConnectionService.getInstance().getHandler().sendMessage(msg);
-  }
-
-  // New samples received! HACK: Spaghetti
   public void updateWithSamples(byte[] samples) {
-    if (source != null) {
-      source.updateWithRemoteSamples(samples);
-    }
+
   }
 
   @Override
@@ -149,4 +137,24 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
     }
   }
 
+  /** Given a payload from afar, update stuff locally. */
+  public void handleMessageReceived(MessageObject msg) {
+    if (MessageUtil.isSamples(msg)) {
+      byte[] samples = msg.getAudioData();
+      if (samples != null) {
+        Log.d(Constants.TAG, "RECV> " + samples.length + " bytes");
+        // New samples received! HACK: Spaghetti
+        if (source != null) {
+          source.updateWithRemoteSamples(samples);
+        }
+      }
+    } else {
+      conversation.updateMetaFromServer(
+          msg.getParticipants(),
+          msg.getTalkingParticipant(),
+          msg.getPastMessages()
+      );
+    }
+
+  }
 }

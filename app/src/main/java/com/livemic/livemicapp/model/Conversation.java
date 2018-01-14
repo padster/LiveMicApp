@@ -4,9 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.BaseObservable;
+import android.os.Message;
+import android.support.v4.util.Preconditions;
 import android.util.Log;
 import android.view.View;
 
+import com.livemic.livemicapp.ConnectionService;
 import com.livemic.livemicapp.Constants;
 import com.livemic.livemicapp.Util;
 import com.livemic.livemicapp.pipes.AudioSource;
@@ -18,6 +21,8 @@ import com.livemic.livemicapp.pipes.wifi.WiFiDirectSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static com.livemic.livemicapp.Constants.MSG_PUSHOUT_DATA;
 
 /**
  * A group discussion with lots of members.
@@ -42,30 +47,25 @@ public class Conversation extends BaseObservable {
   private final Participant me;
 
   private final WiFiDirectSource wifiSource;
-  private final WiFiDirectSink wifiSink;
+  private WiFiDirectSink wifiSink;
 
   public Conversation(
       Context ctx,
       boolean amModerator,
       Participant me,
       String currentTalker,
-      WiFiDirectSource wifiSource,
-      WiFiDirectSink wifiSink) {
+      WiFiDirectSource wifiSource) {
     this.ctx = ctx;
     this.amModerator = amModerator;
     this.me = me;
     this.wifiSource = wifiSource;
-    this.wifiSink = wifiSink;
-
     this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
     this.recentMessages = new ArrayList<>();
     if (me.name.equals(currentTalker)) {
-      Log.i(Constants.TAG, "ME TALK FIRST");
       talkingSource.switchToLocalSource(createMicSourceAndMaybeAttachToWiFi());
     } else {
-      Log.i(Constants.TAG, "THEY TALK FIRST");
       talkingSource.switchToRemoteSource(wifiSource);
     }
   }
@@ -84,19 +84,9 @@ public class Conversation extends BaseObservable {
     return amModerator;
   }
 
-  /** @return Whether I can mute this user. */
-  public boolean canMute(Participant p) {
-    return amModerator() && isTalker(p) && !p.name.equals(me.name);
-  }
-
   /** @return Participant in a particular position. */
   public Participant getParticipant(int position) {
     return participants.get(position);
-  }
-
-  /** @return Whether the sound data is coming from the device. */
-  public boolean isLocalAudio() {
-    return talkingSource.isLocal();
   }
 
   /** @return Number of participants. */
@@ -145,7 +135,27 @@ public class Conversation extends BaseObservable {
   /** New person has joined! */
   public void addParticipant(Participant participant) {
     participants.add(participant);
+    if (amModerator) {
+      pushChange(MessageUtil.fromParticipants(participants));
+    }
     notifyChange();
+  }
+  /** Person left :( */
+  public void removeParticipant(String name) {
+    Participant matched = null;
+    for (Participant p : participants) {
+      if (p.name.equals(name)) {
+        matched = p;
+        break;
+      }
+    }
+    if (matched != null) {
+      participants.remove(matched);
+      if (amModerator) {
+        pushChange(MessageUtil.fromParticipants(participants));
+      }
+      notifyChange();
+    }
   }
 
   /** New person is talking! */
@@ -156,6 +166,9 @@ public class Conversation extends BaseObservable {
     boolean talkIsLocal = talkingSource.isLocal();
     if (talkerIsMe != talkIsLocal) {
       switchAudioSource();
+    }
+    if (amModerator) {
+      pushChange(MessageUtil.fromNewTalker(currentTalker));
     }
     notifyChange();
   }
@@ -170,6 +183,9 @@ public class Conversation extends BaseObservable {
     if (previousMessages != null) {
       this.recentMessages.clear();
       this.recentMessages.addAll(previousMessages);
+      if (amModerator) {
+        pushChange(MessageUtil.fromPastMessages(new ArrayList<>(previousMessages)));
+      }
       changed = true;
     }
     if (currentMessage != null) {
@@ -202,6 +218,10 @@ public class Conversation extends BaseObservable {
     }
   }
 
+  public void sendSamples(byte[] samples) {
+    pushChange(MessageUtil.fromSamples(samples));
+  }
+
   // HACK
 
   // TODO - proper stuff...
@@ -228,5 +248,54 @@ public class Conversation extends BaseObservable {
       micSource.addSink(wifiSink);
     }
     return micSource;
+  }
+
+  /** Pushes a conversation metadata change to all clients. */
+  private void pushChange(MessageObject message) {
+    if (!MessageUtil.isSamples(message) && !amModerator) {
+      throw new IllegalStateException("Only moderator can push metadata");
+    };
+    Log.d(Constants.TAG, "pushOutMessage : " + message.toString());
+    Message msg = ConnectionService.getInstance().getHandler().obtainMessage();
+    msg.what = MSG_PUSHOUT_DATA;
+    msg.obj = message;
+    ConnectionService.getInstance().getHandler().sendMessage(msg);
+  }
+
+  /** Invoked on a client when the server pushes new metadata. */
+  public void updateMetaFromServer(
+      List<Participant> participants, String talkingParticipant, List<String> pastMessages) {
+    if (amModerator) {
+      throw new IllegalStateException("Only non-moderators need to process metadata");
+    }
+
+    Log.i(Constants.TAG, "META CHANGE: " + participants + "\n" + talkingParticipant + "\n" + pastMessages);
+    if (participants != null) {
+      this.participants.clear();
+      this.participants.addAll(participants);
+    }
+    if (talkingParticipant != null) {
+      currentTalker = talkingParticipant;
+      boolean talkerIsMe = me.name.equals(currentTalker);
+      boolean talkIsLocal = talkingSource.isLocal();
+      if (talkerIsMe != talkIsLocal) {
+        switchAudioSource();
+      }
+    }
+    if (pastMessages != null) {
+      currentMessage = "";
+      recentMessages.clear();
+      recentMessages.addAll(pastMessages);
+    }
+    notifyChange();
+  }
+
+  // HACK - Conversation needs a direct sink for construction,
+  // direct sink then also needs a conversation.
+  public void setSink(WiFiDirectSink sink) {
+    this.wifiSink = sink;
+    if (talkingSource.isLocal()) {
+      talkingSource.attachToNewWiFiSink(sink);
+    }
   }
 }

@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import com.livemic.livemicapp.model.MessageObject;
+import com.livemic.livemicapp.model.MessageUtil;
 import com.livemic.livemicapp.wifidirect.WorkHandler;
 
 import java.io.Serializable;
@@ -208,7 +209,7 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
         public void run() {
           HACKpeersAvailableDelayed(peerList);
         }
-      }, 50);
+      }, 20);
     }
 
     private void HACKpeersAvailableDelayed(WifiP2pDeviceList peerList) {
@@ -369,23 +370,13 @@ public class ConnectionService extends Service implements WifiP2pManager.Channel
      */
     private Serializable onPullInData(SocketChannel schannel, Bundle b) {
         Serializable data = b.getSerializable(Constants.KEY_DATA);
-//        Log.d(TAG, "onDataIn : recvd msg : " + data);
+        Log.d(TAG, "onDataIn : recvd msg : " + data);
         mConnMan.onDataIn(schannel, data);  // pub to all client if this device is server.
         MessageObject msg = (MessageObject) data;
 
-        byte[] samples = msg.getAudioData();
-        if (samples != null) {
-          Log.d(TAG, "RECV> " + samples.length + " bytes");
-          if (mActivity != null) {
-            // HACK - spaghetti code
-            mActivity.updateWithSamples(samples);
-          }
+        if (mActivity != null) {
+          mActivity.handleMessageReceived(msg);
         }
-
-        // TODO play audio
-//        showNotification(row);
-        // add to activity if it is on focus.
-//        showInActivity(row);
         return data;
     }
 

@@ -4,32 +4,61 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-/**
- * Created by Prayansh on 2018-01-13.
- */
-
+/** Payload for all possible messages that can be sent. */
 public class MessageObject implements Parcelable, Serializable {
     private byte[] audioData;
-    public static final String mDel = "^&^";
+    private List<String> participantNames;
+    private String talkingParticipant;
+    private List<String> pastMessages;
 
     private MessageObject() {
-        audioData = null;
+      audioData = null;
+      participantNames = null;
+      talkingParticipant = null;
+      pastMessages = null;
     }
 
-    public MessageObject(byte[] audioData) {
-        this.audioData = audioData;
+    public MessageObject(
+        byte[] audioData,
+        List<String> participantNames,
+        String talkingParticipant,
+        List<String> pastMessages) {
+      this.audioData = audioData;
+      this.participantNames = participantNames;
+      this.talkingParticipant = talkingParticipant;
+      this.pastMessages = pastMessages;
     }
 
     public MessageObject(Parcel in) {
-        readFromParcel(in);
+      readFromParcel(in);
     }
 
     public byte[] getAudioData() {
       return this.audioData;
     }
 
+    public List<Participant> getParticipants() {
+      if (participantNames == null) {
+        return null;
+      }
+      List<Participant> result = new ArrayList<>();
+      for (String name : participantNames) {
+        result.add(new Participant(name));
+      }
+      return result;
+    }
+
+    public String getTalkingParticipant() {
+      return talkingParticipant;
+    }
+
+    public List<String> getPastMessages() {
+      return pastMessages;
+    }
 
     @Override public int describeContents() {
         return 0;
@@ -37,12 +66,16 @@ public class MessageObject implements Parcelable, Serializable {
 
     public void readFromParcel(Parcel in) {
         in.readByteArray(audioData);
+        in.readStringList(participantNames);
+        talkingParticipant = in.readString();
+        in.readStringList(pastMessages);
     }
 
     @Override public void writeToParcel(Parcel dest, int flags) {
-        if (audioData != null) {
-            dest.writeByteArray(audioData);
-        }
+        dest.writeByteArray(audioData);
+        dest.writeStringList(participantNames);
+        dest.writeString(talkingParticipant);
+        dest.writeStringList(pastMessages);
     }
 
     public static final Creator<MessageObject> CREATOR = new Creator<MessageObject>() {
@@ -57,9 +90,13 @@ public class MessageObject implements Parcelable, Serializable {
         }
     };
 
-    @Override public String toString() {
-        return "MessageObject{" +
-                "audioData=" + Arrays.toString(audioData) +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "MessageObject{" +
+        "audioData=" + Arrays.toString(audioData) +
+        ", participantNames=" + participantNames +
+        ", talkingParticipant='" + talkingParticipant + '\'' +
+        ", pastMessages=" + pastMessages +
+        '}';
+  }
 }
