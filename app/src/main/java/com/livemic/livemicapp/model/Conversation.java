@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.BaseObservable;
-import android.icu.text.MessagePattern;
 import android.util.Log;
 import android.view.View;
 
@@ -13,6 +12,7 @@ import com.livemic.livemicapp.Util;
 import com.livemic.livemicapp.pipes.AudioSource;
 import com.livemic.livemicapp.pipes.MicSource;
 import com.livemic.livemicapp.pipes.RemoteOrLocalSource;
+import com.livemic.livemicapp.pipes.wifi.WiFiDirectSink;
 import com.livemic.livemicapp.pipes.wifi.WiFiDirectSource;
 
 import java.util.ArrayList;
@@ -40,21 +40,28 @@ public class Conversation extends BaseObservable {
 
   private boolean amModerator;
   private final Participant me;
+  private final WiFiDirectSource wifiSource;
+  private final WiFiDirectSink wifiSink;
 
   public Conversation(
       Context ctx,
       boolean amModerator,
       Participant me,
-      String currentTalker) {
+      String currentTalker,
+      WiFiDirectSource wifiSource,
+      WiFiDirectSink wifiSink) {
     this.ctx = ctx;
     this.amModerator = amModerator;
     this.me = me;
+    this.wifiSource = wifiSource;
+    this.wifiSink = wifiSink;
+
     this.participants = new ArrayList<>();
     this.currentTalker = currentTalker;
     this.talkingStartMs = System.currentTimeMillis();
     this.recentMessages = new ArrayList<>();
     if (me.name.equals(currentTalker)) {
-      talkingSource.switchToLocalSource(new MicSource());
+      talkingSource.switchToLocalSource(createMicSourceAndMaybeAttachToWiFi());
     }
   }
 
@@ -200,10 +207,19 @@ public class Conversation extends BaseObservable {
   public void hackSwitchAudio() {
     Log.i(Constants.TAG, "Switching from " + (talkingSource.isLocal() ? " local" : " remote"));
     if (talkingSource.isLocal()) {
-      talkingSource.switchToRemoteSource(new WiFiDirectSource());
+      talkingSource.switchToRemoteSource(wifiSource);
     } else {
-      talkingSource.switchToLocalSource(new MicSource());
+      talkingSource.switchToLocalSource(createMicSourceAndMaybeAttachToWiFi());
     }
     notifyChange();
+  }
+
+  /** Creates a source from the mic, and if connected, also forward the result to wifi. */
+  private MicSource createMicSourceAndMaybeAttachToWiFi() {
+    MicSource micSource = new MicSource();
+    if (wifiSink != null) {
+      micSource.addSink(wifiSink);
+    }
+    return micSource;
   }
 }

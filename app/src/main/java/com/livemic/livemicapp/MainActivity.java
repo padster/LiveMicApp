@@ -110,7 +110,10 @@ public class MainActivity extends AppCompatActivity implements TextChatLog {
         this, // Owner activity
         true, // Whether I'm the moderator
         p1,   // My identity
-        "P1"  // Name of the current talker
+        "P1",  // Name of the current talker
+        // TODO: Wire up wifi connections and attach them in here...
+        null,
+        null
     );
     testConversation.addParticipant(p1);
     testConversation.addParticipant(p2);

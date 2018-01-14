@@ -44,7 +44,10 @@ public class RemoteOrLocalSource extends AudioSource implements AudioSink {
       }
     }
     remoteSource = newRemoteSource;
-    remoteSource.addSink(this);
+    if (remoteSource != null) {
+      // NOTE: null is fine here, it means no source.
+      remoteSource.addSink(this);
+    }
   }
 
   @Override
@@ -52,5 +55,4 @@ public class RemoteOrLocalSource extends AudioSource implements AudioSink {
     // Forward from upstream source to downstream sinks
     handleNewSamples(samples);
   }
-
 }
